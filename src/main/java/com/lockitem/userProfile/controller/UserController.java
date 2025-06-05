@@ -3,45 +3,55 @@ package com.lockitem.userProfile.controller;
 import com.lockitem.userProfile.dto.LoginRequestDTO;
 import com.lockitem.userProfile.dto.UserRequestDTO;
 import com.lockitem.userProfile.dto.UserResponseDTO;
-import com.lockitem.userProfile.entity.User;
-import com.lockitem.userProfile.mapper.UserMapper;
 import com.lockitem.userProfile.service.IUserService;
 import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/user")
 public class UserController {
-    @Autowired
-    private IUserService userService;
+
+    private final IUserService userService;
+
+    public UserController(IUserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/all")
     @Operation(summary = "Listar todos los usuarios")
     public ResponseEntity<List<UserResponseDTO>> findAll() {
-        List<UserResponseDTO> users = userService.findAll().stream()
-                .map(UserMapper::toDTO)
-                .collect(Collectors.toList());
+        List<UserResponseDTO> users = userService.findAll();
         return ResponseEntity.ok(users);
     }
 
     @PostMapping("/register")
     @Operation(summary = "Registrar un nuevo usuario")
-    public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO dto) {
-        User saved = userService.createUser(UserMapper.toEntity(dto));
-        return ResponseEntity.ok(UserMapper.toDTO(saved));
+    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserRequestDTO dto) {
+        UserResponseDTO savedUser = userService.createUser(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser); // Devolver 201 Created para creación exitosa
     }
 
     @PostMapping("/login")
     @Operation(summary = "Iniciar sesión")
     public ResponseEntity<UserResponseDTO> login(@RequestBody LoginRequestDTO dto) {
-        return userService.findByEmailAndPassword(dto.email, dto.password)
-                .map(UserMapper::toDTO)
+        Optional<UserResponseDTO> authenticatedUser = userService.authenticate(dto);
+
+        return authenticatedUser
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(401).build());
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()); // Devolver 401 Unauthorized si falla la autenticación
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Obtener usuario por ID")
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
+        return userService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build()); // Devolver 404 Not Found si no se encuentra
     }
 }
