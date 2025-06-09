@@ -12,5 +12,6 @@ public interface InventoryMapper {
     Inventory toEntity(InventoryRequestDTO dto);
 
     @Mapping(source = "store.id", target = "storeId")
+    @Mapping(source = "iotDevice", target = "iotDevice")
     InventoryResponseDTO toDTO(Inventory inventory);
 }
