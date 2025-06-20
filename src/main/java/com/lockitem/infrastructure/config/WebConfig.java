@@ -12,7 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins(
-                        "*" // Aca debe ir las url de la app web, movil e iot(creo)
+                        "http://localhost:4200" // Aca debe ir las url de la app web, movil e iot(creo)
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
