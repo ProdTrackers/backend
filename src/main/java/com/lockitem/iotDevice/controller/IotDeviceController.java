@@ -42,4 +42,10 @@ public class IotDeviceController {
         List<IotDeviceResponseDTO> deviceList = iotDeviceService.findAll();
         return ResponseEntity.ok(deviceList);
     }
+
+    @GetMapping("/{id}/is-reserved")
+    public ResponseEntity<Boolean> isDeviceReserved(@PathVariable Long id) {
+        boolean reserved = iotDeviceService.isDeviceReserved(id);
+        return ResponseEntity.ok(reserved);
+    }
 }

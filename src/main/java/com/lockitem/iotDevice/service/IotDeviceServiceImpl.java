@@ -7,6 +7,7 @@ import com.lockitem.iotDevice.dto.IotDeviceResponseDTO;
 import com.lockitem.iotDevice.entity.IotDevice;
 import com.lockitem.iotDevice.mapper.IotDeviceMapper;
 import com.lockitem.iotDevice.repository.IotDeviceRepository;
+import com.lockitem.reservationManagement.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,14 +20,19 @@ public class IotDeviceServiceImpl implements IIotDeviceService {
     private final IotDeviceRepository iotDeviceRepository;
     private final IotDeviceMapper iotDeviceMapper;
     private final InventoryRepository inventoryRepository;
+    private final ReservationRepository reservationRepository;
 
     public IotDeviceServiceImpl(IotDeviceRepository iotDeviceRepository,
                                 IotDeviceMapper iotDeviceMapper,
-                                InventoryRepository inventoryRepository) {
+                                InventoryRepository inventoryRepository,
+                                ReservationRepository reservationRepository) {
         this.iotDeviceRepository = iotDeviceRepository;
         this.iotDeviceMapper = iotDeviceMapper;
         this.inventoryRepository = inventoryRepository;
+        this.reservationRepository = reservationRepository;
     }
+
+
 
     @Override
     public IotDeviceResponseDTO create(IotDeviceRequestDTO iotDeviceRequestDTO) {
@@ -52,5 +58,15 @@ public class IotDeviceServiceImpl implements IIotDeviceService {
         return iotDeviceRepository.findAll().stream()
                 .map(iotDeviceMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isDeviceReserved(Long id) {
+        IotDevice device = iotDeviceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("IoT device not found with ID: " + id));
+
+        Inventory inventory = device.getInventory();
+
+        return reservationRepository.existsByInventory(inventory);
     }
 }
