@@ -6,9 +6,6 @@ import lombok.Data;
 @Data
 public class IotDeviceRequestDTO {
 
-    @NotNull(message = "Device identifier cannot be null")
-    private String deviceIdentifier;
-
     private double latitude;
     private double longitude;
 
