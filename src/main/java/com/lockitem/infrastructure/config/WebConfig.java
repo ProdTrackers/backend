@@ -13,7 +13,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins(
                         "http://localhost:4200", // Aca debe ir las url de la app web, movil e iot(creo)
-                    "https://lockitem-iot-appweb.web.app"
+                    "https://lockitem-iot-appweb.web.app",
+                    "https://lockitem-appmovil.netlify.app"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
